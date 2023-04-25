@@ -1,0 +1,131 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Vocabulary Dashboard</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	{% tailwind_css %}
+
+</head>
+
+<body>
+
+	<!-- Create Team Modal -->
+	{% include "modals/create_team.html" %}
+	<!-- Create Vocabulary Modal -->
+	{% include "modals/create_vocabulary.html" %}
+
+
+	<div class="h-screen bg-white overflow-visible flex">
+
+		<!-- Static sidebar for mobile -->
+		{% include "sidebars/mobile.html" %}
+		<!-- Static sidebar for desktop -->
+		{% include "sidebars/desktop.html" %}
+
+		<div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+			{% include "header/searchbar_globally.html" %}
+
+			<main class="flex-1 relative overflow-y-auto focus:outline-none">
+				<div class="py-6">
+					<div class="px-4 sm:px-6 md:px-0 {% if search_results != None %} mt-6 {% endif %}">
+						<h1 class="text-2xl font-semibold text-gray-900">Vocabulary Dashboard</h1>
+					</div>
+					<div class="px-4 sm:px-6 md:px-0">
+						
+						<div class="py-4">
+							<form method='POST' action="">{% csrf_token %}
+								
+								<div class="flex flex-col">
+									<div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+										<div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+											<div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+												<table class="min-w-full divide-y divide-gray-200">
+													<thead class="bg-gray-50">
+														<tr>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+																Name
+															</th>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+																Team
+															</th>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+																Status
+															</th>
+															<th scope="col"
+																class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+																Role
+															</th>
+
+														</tr>
+													</thead>
+													<tbody class="bg-white divide-y divide-gray-200">
+														{% for voc in vocabulary_list %}
+															<tr>
+																<td class="px-6 py-4 whitespace-nowrap">
+																	<div class="flex items-center">
+																		<div class="ml-4">
+																			<div class="text-sm text-gray-900">
+																				<a href="{% url 'vocabulary_overview' voc_name=voc.vocabulary.name %}">
+																					{{voc.vocabulary.name}}
+																				</a>
+																			</div>
+																		</div>
+																	</div>
+																</td>
+																<td
+																	class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+																	<div class="text-sm text-gray-900">
+																	{% if 'team' in voc%} {{voc.team.name}} {% endif %}
+																	</div>
+																	<div class="text-sm text-gray-500">
+																	{% if 'team' in voc%} {{voc.team.groupprofile.description}} {% endif %}
+																	</div>
+																</td>
+																<td
+																	class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+																	<span
+																		class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 hidden md:table-cell">
+																		{{voc.vocabulary.state}}
+																	</span>
+																</td>
+																<td
+																	class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">	
+																	{% load guardian_tags %}
+																	{% if 'team' in voc%} {% get_obj_perms voc.team for voc.vocabulary as "vocabulary_perms" %}
+                                                                	{% else %} {% get_obj_perms user for voc.vocabulary as "vocabulary_perms" %}
+																	{% endif %}
+                                                                	{% if "owner" in vocabulary_perms %} Owner
+																	{% elif "participant" in vocabulary_perms %} Member
+																	{% elif "spectator" in vocabulary_perms %} Spectator
+																	{% endif %}
+																</td>
+															</tr>
+														{% endfor %}
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+
+							</form>
+						</div>
+						<!-- /End replace -->
+					</div>
+				</div>
+			</main>
+		</div>
+	</div>
+
+</body>
+<script src="{% static 'js/main.js' %}"></script>
+
+</html>

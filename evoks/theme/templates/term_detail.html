@@ -1,0 +1,465 @@
+{% load static tailwind_tags %}
+{% load guardian_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Term detail</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% tailwind_css %}
+    <script src="{% static 'js/field.js' %}"></script>
+
+</head>
+
+<body>
+    <!-- Create Team Modal -->
+    {% include "modals/create_team.html" %}
+    <!-- Create Tag Modal -->
+    {% include "modals/create_tag.html" %}
+    <!-- Create Property Modal -->
+    {% include "modals/create_property.html" %}
+    <!-- Broader Term Modal (broader option 2) -->
+    {% include "modals/create_broader.html" %}
+    <!-- Create Vocabulary Modal -->
+    {% include "modals/create_vocabulary.html" %}
+
+    <!-- Create Vocabulary Modal -->
+    {% include "modals/delete_term.html" %}
+
+    <div class="h-screen bg-white overflow-visible flex">
+
+        <!-- Static sidebar for mobile -->
+        {% include "sidebars/mobile.html" %}
+        <!-- Static sidebar for desktop -->
+        {% include "sidebars/desktop.html" %}
+
+        <div class="flex-1 max-w-7xl mx-auto w-0 flex flex-col md:px-8 xl:px-0">
+            {% include "header/no_searchbar.html" %}
+
+            <main class="flex-1 relative focus:outline-none">
+                <div class="py-6">
+                    <div class="px-4 sm:px-6 md:px-0">
+                        <a href='{% url 'vocabulary_terms' voc_name=vocabulary.name %}'
+                        class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-regal-blue font-medium rounded text-gray-700 bg-test focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                        back to Terms overview
+                        </a>
+                        <h1 class="text-xl font-semibold text-gray-900">Term: {{ term.name }}
+                        </h1>
+                    </div>
+                    <div class="px-4 sm:px-6 md:px-0">
+                        
+                        <div class="py-4">
+
+                            <div class="mt-5 border-t border-gray-200">
+                                <dl class="divide-y divide-gray-200">
+                                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                                        <dt class="text-sm font-medium text-gray-700">
+                                            <div>Predicate</div>
+                                        </dt>
+                                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">                                        
+                                            <div class="grid grid-cols-5 justify-between">
+                                                <span
+                                                    class="flex-grow mt-2 col-span-2 font-medium text-gray-700">
+                                                    Value</span>
+                                    
+                                                <span class="flex-grow mt-2 col-span-1 text-center font-medium text-gray-700">
+                                                    Language
+                                                </span>
+                                                <span class="ml-4">
+                                                </span>
+                                            </div>
+                                        </dd>
+                                    </div>
+                                    {% for key, value in fields.items %}
+                                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+                                        <dt class="text-sm font-medium text-gray-500">
+                                            <div id="title-subject-{{forloop.counter}}">{{ value.type }}</div>
+                                        </dt>
+                                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                            {% for obj in value.objects %}
+
+                                            <form action="" method="POST"> {% csrf_token %}
+                                                <div class="grid grid-cols-5 justify-between">
+
+                                                    <input type="hidden" name="key" value="{{key}}">
+                                                    <input type="hidden" name="pred" value="{{value.type}}">
+                                                    <input type="hidden" name="lang" value="{{obj.lang|default:''}}">
+                                                    <input type="hidden" name="obj-type" value="{{obj.type}}">
+                                                    <input type="hidden" name="obj" value="{{obj.value}}">
+                                                    <input type="hidden" name="obj-datatype" value="{{obj.datatype|default:''}}">
+                                                    <input type="hidden" name="shortcut" value="{{obj.shortcut}}">
+                                                    {% if obj.shortcut != None %}
+
+                                                    <a href="{{ obj.value }}" target="_blank"
+                                                        id="title-value-{{forloop.parentloop.counter}}-{{forloop.counter}}"
+                                                        class="flex-grow mt-2 col-span-2">
+                                                        {{ obj.shortcut }}
+                                                    </a>
+
+                                                    {% else %}
+                                                    <span
+                                                        id="title-value-{{forloop.parentloop.counter}}-{{forloop.counter}}"
+                                                        class="flex-grow mt-2 col-span-2">
+                                                        {{ obj.value }}</span>
+                                     
+                                                    {% endif %}
+                                                    <span class="flex-grow mt-2 col-span-1 text-center">
+                                                        {% if obj.lang != '' %}
+                                                        {{ obj.lang_display }}
+                                                        {% endif %}
+                                                    </span>
+                                                    {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                                    {% if "owner" in vocabulary_perms or "participant" in vocabulary_perms %} 
+                                                    <span class="ml-4">
+                                                        <button type="button"
+                                                            id="update-button-{{forloop.parentloop.counter}}-{{forloop.counter}}"
+                                                            data-inner="{{forloop.counter}}"
+                                                            data-outer="{{forloop.parentloop.counter}}"
+                                                            onclick="changeToInput(this.id)"
+                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 float-right">
+                                                            Update
+                                                        </button>
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+
+                                            </form>
+                                            {% endfor %}
+                                        </dd>
+                                    </div>
+                                    {% endfor %}
+                                </dl>
+                                <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+                                    <dt class="text-sm font-medium text-gray-500">
+                                        Download
+                                    </dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                                            <form action="#" method="post">
+                                                {% csrf_token %}
+                                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                    <div class="w-0 flex-1 flex items-center">
+                                                        <!-- Heroicon name: solid/paper-clip -->
+                                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
+                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                            fill="currentColor" aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span class="ml-2 flex-1 w-0 truncate">
+                                                            RDF/XML
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-4 flex-shrink-0 flex space-x-4">
+                                                        <button type="submit" name="download" value="rdf+xml"
+                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                            Download
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                    <div class="w-0 flex-1 flex items-center">
+                                                        <!-- Heroicon name: solid/paper-clip -->
+                                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
+                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                            fill="currentColor" aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span class="ml-2 flex-1 w-0 truncate">
+                                                            JSON-LD
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-4 flex-shrink-0 flex space-x-4">
+                                                        <button type="submit" name="download" value="json-ld"
+                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                            Download
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                    <div class="w-0 flex-1 flex items-center">
+                                                        <!-- Heroicon name: solid/paper-clip -->
+                                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
+                                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                            fill="currentColor" aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span class="ml-2 flex-1 w-0 truncate">
+                                                            TURTLE
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-4 flex-shrink-0 flex space-x-4">
+                                                        <button type="submit" name="download" value="turtle"
+                                                            class="bg-white rounded-md font-medium text-regal-blue hover:text-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                            Download
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            </form>
+                                        </ul>
+                                    </dd>
+                                </div>
+                                </dl>
+                                {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                {% if "owner" in vocabulary_perms or "participant" in vocabulary_perms %}
+                                <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+                                    <dt class="text-sm font-medium text-regal-blue">
+                                    </dt>
+                                    <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        <span class="flex-grow">
+
+                                        </span>
+                                        <span class="ml-4 flex-shrink-0">
+
+                                            <button id="create-property-button"
+                                                class="inline-flex items-center px-3 py-2 font-medium rounded px-4 py-2 leading-5 bg-regal-blue text-primary-100 text-white hover:text-white focus:ring-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                                                <svg class="inline-block w-5 h-5 mr-1" fill="none"
+                                                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg> Add term property
+                                            </button>
+                                        </span>
+                                    </dd>
+                                    <!-- broader option 2 -->
+                                    <dt class="text-sm font-medium text-regal-blue">
+                                    </dt>
+                                </div>
+                                {% endif %}
+
+                                {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                {% if "owner" in vocabulary_perms or "participant" in vocabulary_perms %}
+                                <div class="py-4 sm:grid sm:py-5 sm:grid-cols-3 sm:gap-4">
+                                    <dt class="text-sm font-medium text-regal-blue">
+                                    </dt>
+                                    <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        <span class="flex-grow">
+
+                                        </span>
+                                        <span class="ml-4 flex-shrink-0">
+
+                                            <button id="create-broader-button"
+                                                class="inline-flex items-center px-3 py-2 font-medium rounded px-4 py-2 leading-5 bg-regal-blue text-primary-100 text-white hover:text-white focus:ring-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                                                <svg class="inline-block w-5 h-5 mr-1" fill="none"
+                                                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg> Add broader term
+                                            </button>
+                                        </span>
+                                    </dd>
+                                    <dt class="text-sm font-medium text-regal-blue">
+                                    </dt>
+                                </div>
+                                {% endif %}
+                                    <dd class="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        <span class="flex-grow">
+
+                                        </span>
+                                        <span class="ml-4 flex-shrink-0">
+                                            {% get_obj_perms user for vocabulary as "vocabulary_perms" %}
+                                            {% if "owner" in vocabulary_perms %}  
+                                            <button id="delete-term-button"
+                                                class="inline-flex items-center px-3 py-2 font-medium rounded px-4 py-2 leading-5 bg-red-500 text-primary-100 text-white hover:text-white focus:ring-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                                                Delete Term
+                                            </button>
+                                            {% endif%}
+                                        </span>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <!-- Tags Thing-->
+                            <form action="#" method="post"> {% csrf_token%}
+                                <div class="float-right mt-5">
+                                    <span class="mr-0.5">
+                                        {% for tag in term.tag_set.all %}
+                                        <button type="submit" name="delete-tag" value="{{tag.name}}"
+                                            class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                            <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-{{tag.color}}-500"
+                                                    aria-hidden="true"></span>
+                                            </span>
+                                            <span class="ml-3.5 font-medium text-gray-900">{{tag.name}}</span>
+                                        </button>
+                                        {% endfor %}
+                                        <!--
+                                        <a href="#"
+                                            class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                            <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"
+                                                    aria-hidden="true"></span>
+                                            </span>
+                                            <span class="ml-3.5 font-medium text-gray-900">Accessibility</span>
+                                        </a> -->
+                                        <a href="#" id="create-tag-button"
+                                            class="relative inline-flex items-center rounded-full border border-gray-300  px-0.5 py-0.5 text-sm bg-regal-blue">
+
+                                            <span class="text-white">
+                                                <svg class="inline-block w-5 h-5" fill="none" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                            </span>
+                                        </a>
+                                    </span>
+                                </div>
+                            </form>
+
+                            <section aria-labelledby="activity-title" class="mt-10 xl:mt-10">
+                                <div>
+                                    <div class="divide-y divide-gray-200">
+                                        <div class="pb-4">
+                                            <h2 id="activity-title" class="text-lg font-medium text-gray-900">Activity
+                                            </h2>
+                                        </div>
+                                        <div class="pt-6">
+                                            <!-- Activity feed-->
+                                            <div class="flow-root">
+                                                <div class="mt-6">
+                                                    <div class="flex space-x-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="relative">
+                                                                <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white"
+                                                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg"
+                                                                    alt="">
+
+                                                                <span
+                                                                    class="absolute -bottom-0.5 -right-1 bg-white rounded-tl px-0.5 py-px">
+                                                                    <!-- Heroicon name: solid/chat-alt -->
+                                                                    <svg class="h-5 w-5 text-gray-400"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        viewBox="0 0 20 20" fill="currentColor"
+                                                                        aria-hidden="true">
+                                                                        <path fill-rule="evenodd"
+                                                                            d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z"
+                                                                            clip-rule="evenodd" />
+                                                                    </svg>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="min-w-0 flex-1">
+                                                            <form action="#" method="post"> {% csrf_token %}
+                                                                <div>
+                                                                    <label for="comment" class="sr-only">Comment</label>
+                                                                    <textarea id="comment" name="comment-text" rows="3" maxlength="1000"
+                                                                        class="shadow-sm block w-full focus:ring-gray-900 focus:border-gray-900 sm:text-sm border border-gray-300 rounded-md"
+                                                                        placeholder="Leave a comment"></textarea>
+                                                                </div>
+                                                                <div
+                                                                    class="mt-6 flex items-center justify-end space-x-4">
+
+                                                                    <button type="submit" name="comment"
+                                                                        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-regal-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                                        Comment
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <ul class="-mb-8">
+                                                    {% for key in activities%}
+                                                    <li>
+                                                        <div class="relative pb-8">
+                                                            <span
+                                                                class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200"
+                                                                aria-hidden="true"></span>
+                                                            <div class="relative flex items-start space-x-3">
+                                                                <div class="relative">
+                                                                    <img class="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white"
+                                                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg"
+                                                                        alt="">
+
+                                                                    <span
+                                                                        class="absolute -bottom-0.5 -right-1 bg-white rounded-tl px-0.5 py-px">
+                                                                        <!-- Heroicon name: solid/chat-alt -->
+                                                                        <svg class="h-5 w-5 text-gray-400"
+                                                                            xmlns="http://www.w3.org/2000/svg"
+                                                                            viewBox="0 0 20 20" fill="currentColor"
+                                                                            aria-hidden="true">
+                                                                            <path fill-rule="evenodd"
+                                                                                d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z"
+                                                                                clip-rule="evenodd" />
+                                                                        </svg>
+                                                                    </span>
+                                                                </div>
+                                                                {% if key.type == 'Comment'%}
+                                                                <div class="min-w-0 flex-1">
+                                                                    <div>
+                                                                        <div class="text-sm">
+                                                                            <a href="#"
+                                                                                class="font-medium text-gray-900">{{key.author.name}}</a>
+                                                                        </div>
+                                                                        <p class="mt-0.5 text-sm text-gray-500">
+                                                                            Commented at {{key.post_date}}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="mt-2 text-sm text-gray-700">
+                                                                        <p>
+                                                                            {{key.text}}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                {% else %}
+                                                                <div class="min-w-0 flex-1 py-0">
+                                                                    <div class="text-sm leading-8 text-gray-500">
+                                                                        <span class="mr-0.5">
+                                                                            <a href="#"
+                                                                                class="font-medium text-gray-900">{{key.author.name}}</a>
+                                                                            added tag
+                                                                        </span>
+                                                                        <span class="mr-0.5">
+                                                                            <a href="#"
+                                                                                class="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm">
+                                                                                <span
+                                                                                    class="absolute flex-shrink-0 flex items-center justify-center">
+                                                                                    <span
+                                                                                        class="h-1.5 w-1.5 rounded-full bg-{{key.color}}-500"
+                                                                                        aria-hidden="true"></span>
+                                                                                </span>
+                                                                                <span
+                                                                                    class="ml-3.5 font-medium text-gray-900">{{key.name}}</span>
+                                                                            </a>
+                                                                        </span>
+                                                                        <span class="whitespace-nowrap">at
+                                                                            {{key.post_date}}</span>
+                                                                    </div>
+                                                                </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+
+                        </div>
+                        <!-- /End replace -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+</body>
+
+<script src="{% static 'js/term_detail.js' %}"></script>
+
+</html>

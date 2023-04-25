@@ -1,0 +1,45 @@
+[
+  {
+    "@id": "http://cv.iptc.org/newscodes/",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+    ],
+    "http://purl.org/dc/elements/1.1/creator": [
+      {
+        "@language": "en",
+        "@value": "International Press Telecommunications Council (IPTC)"
+      }
+    ],
+    "http://purl.org/dc/elements/1.1/description": [
+      {
+        "@language": "en",
+        "@value": "IPTC creates and maintains sets of concepts – called a controlled\nvocabulary or a taxonomy – to be assigned as metadata values to news objects\nlike text, photographs, graphics, audio and video files and streams. This\nallows for a consistent coding of news metadata across news providers and\nover the course of time – that’s the reason why we call them IPTC\nNewsCodes."
+      }
+    ],
+    "http://purl.org/dc/elements/1.1/title": [
+      {
+        "@language": "fi",
+        "@value": "IPTC NewsCodes"
+      },
+      {
+        "@language": "en",
+        "@value": "IPTC NewsCodes"
+      }
+    ],
+    "http://purl.org/dc/terms/language": [
+      {
+        "@id": "http://lexvo.org/id/iso639-3/eng"
+      }
+    ],
+    "http://purl.org/dc/terms/license": [
+      {
+        "@id": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    ],
+    "http://xmlns.com/foaf/0.1/homepage": [
+      {
+        "@id": "https://iptc.org/standards/newscodes/"
+      }
+    ]
+  }
+]
